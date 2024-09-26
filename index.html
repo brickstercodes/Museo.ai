@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Google Maps Directions</title>
+    <style>
+      #map {
+        height: 400px;
+        width: 100%;
+      }
+      #directions {
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Google Maps Directions</h1>
+    <div>
+      <label for="origin">Origin:</label>
+      <input type="text" id="origin" name="origin" required />
+    </div>
+    <div>
+      <label for="destination">Destination:</label>
+      <input type="text" id="destination" name="destination" required />
+    </div>
+    <button onclick="getDirections()">Get Directions</button>
+    <div id="map"></div>
+    <div id="directions"></div>
+
+    <script>
+      let map;
+      let directionsService;
+      let directionsRenderer;
+
+      async function initMap() {
+        const response = await fetch("http://localhost:8000/api_key");
+        const data = await response.json();
+        const apiKey = data.api_key;
+
+        const script = document.createElement("script");
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initializeMap&libraries=places`;
+        script.async = true;
+        document.head.appendChild(script);
+      }
+
+      function initializeMap() {
+        const defaultLocation = { lat: 40.7128, lng: -74.006 }; // New York City
+        map = new google.maps.Map(document.getElementById("map"), {
+          zoom: 7,
+          center: defaultLocation,
+        });
+
+        directionsService = new google.maps.DirectionsService();
+        directionsRenderer = new google.maps.DirectionsRenderer();
+        directionsRenderer.setMap(map);
+      }
+
+      async function getDirections() {
+        const origin = document.getElementById("origin").value;
+        const destination = document.getElementById("destination").value;
+
+        const response = await fetch("http://localhost:8000/get_directions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ origin, destination }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          displayDirections(data);
+          renderRoute(origin, destination);
+        } else {
+          alert("Error: " + data.detail);
+        }
+      }
+
+      function displayDirections(data) {
+        const directionsDiv = document.getElementById("directions");
+        directionsDiv.innerHTML = `
+                <h2>Directions</h2>
+                <p>Distance: ${data.distance}</p>
+                <p>Duration: ${data.duration}</p>
+                <ol>
+                    ${data.steps.map((step) => `<li>${step}</li>`).join("")}
+                </ol>
+            `;
+      }
+
+      function renderRoute(origin, destination) {
+        const request = {
+          origin: origin,
+          destination: destination,
+          travelMode: "DRIVING",
+        };
+
+        directionsService.route(request, function (result, status) {
+          if (status === "OK") {
+            directionsRenderer.setDirections(result);
+          }
+        });
+      }
+
+      initMap();
+    </script>
+  </body>
+</html>
