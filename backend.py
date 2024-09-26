@@ -21,7 +21,7 @@ app = FastAPI()
 # Allow CORS for local frontend development
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # You can restrict this to specific origins if needed
+    allow_origins=["*"],  # Keeping it open for local development
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -31,11 +31,11 @@ app.add_middleware(
 current_time = datetime.now()
 Settings.llm = TogetherLLM(
     model="meta-llama/Meta-Llama-3-70B-Instruct-Turbo", 
-    api_key=os.getenv("")  # Use env var for API key
+    api_key=os.getenv("TOGETHER_API_KEY")  # Make sure the environment variable is set
 )
 
 # Initialize FAISS index
-dimension = 384  # This should match the dimension of your embeddings
+dimension = 384  # Ensure this matches the actual embedding dimension
 index = faiss.IndexFlatL2(dimension)
 content_store = []  # This will store the content corresponding to each embedding
 
@@ -132,94 +132,71 @@ async def websocket_endpoint(websocket: WebSocket):
             context = ""
             for idx in indices[0]:
                 if idx < len(content_store):
-                    context += f"{content_store[idx]}\n"
+                    context += content_store[idx] + " "
 
-            prompt = f"""Based on the following context and chat history, please respond to the user's question:
+            # Create chat history if not present
+            session_id = json.loads(data).get("session_id", "default_session")
+            if session_id not in session_histories:
+                session_histories[session_id] = ""
 
-Context:
-{context}
+            # Append user's message to session history
+            session_histories[session_id] += f"User: {user_input}\n"
 
-Chat History:
-{chat_history}
-
-User Question: {user_input}
-
-Please provide a relevant and informative response:"""
-
-            response = Settings.llm.stream_complete(character_creation_template.format(question=prompt, history=chat_history))
-            full_response = ""
+            response = await Settings.llm.stream_complete(
+                prompt_template=character_creation_template,
+                history=session_histories[session_id],
+                temperature=0.7
+            )
             
-            for r in response:
-                full_response += r.delta
-                await websocket.send_text(json.dumps({"delta": r.delta}))
+            full_response = response['response']
             
-            chat_history += f"User: {user_input}\nCharacter: {full_response}\n"
-            
-            if "<DONE>" in full_response:
-                await websocket.send_text(json.dumps({"complete": True}))
+            # Append AI response to session history
+            session_histories[session_id] += f"Museo AI: {full_response}\n"
+
+            # Clean up and format the response (optional)
+            full_response = re.sub(r" (\d)\. ", r"\n \1. ", full_response)
+
+            await websocket.send_text(json.dumps({"response": full_response}))
 
     except Exception as e:
-        print(f"Error: {str(e)}")
-    finally:
+        await websocket.send_text(json.dumps({"error": str(e)}))
         await websocket.close()
 
-def add_to_index(content: str):
-    embedding = generate_embedding(content)
-    index.add(np.array([embedding]).astype('float32'))
-    content_store.append(content)
-
-def load_initial_data():
-    initial_data = [
-        "This is some initial content",
-        "Another piece of initial content",
-        # Add more initial content here if needed
-    ]
-    for content in initial_data:
-        add_to_index(content)
-
-load_initial_data()
 
 @app.post("/chat/")
-async def chat(request: ChatRequest):
-    session_id = request.session_id
+async def handle_chat(request: ChatRequest):
     user_input = request.user_input
+    session_id = request.session_id
 
-    chat_history = session_histories.get(session_id, "")
-    
+    # Perform vector search using FAISS
     query_vector = np.array([generate_embedding(user_input)]).astype('float32')
-    k = 5
+    k = 5  # number of nearest neighbors to retrieve
     distances, indices = index.search(query_vector, k)
 
     context = ""
     for idx in indices[0]:
         if idx < len(content_store):
-            context += f"{content_store[idx]}\n"
+            context += content_store[idx] + " "
 
-    prompt = f"""Based on the following context and chat history, please respond to the user's question:
+    # Create chat history if not present
+    if session_id not in session_histories:
+        session_histories[session_id] = ""
 
-Context:
-{context}
+    # Append user's message to session history
+    session_histories[session_id] += f"User: {user_input}\n"
 
-Chat History:
-{chat_history}
+    response = await Settings.llm.stream_complete(
+        prompt_template=character_creation_template,
+        history=session_histories[session_id],
+        temperature=0.7
+    )
 
-User Question: {user_input}
+    full_response = response['response']
 
-Please provide a relevant and informative response:"""
+    # Append AI response to session history
+    session_histories[session_id] += f"Museo AI: {full_response}\n"
 
-    response = Settings.llm.stream_complete(character_creation_template.format(question=prompt, history=chat_history))
-    full_response = ""
-    
-    for r in response:
-        full_response += r.delta
-
+    # Clean up and format the response
     full_response = re.sub(r" (\d)\. ", r"\n \1. ", full_response)
 
-    chat_history += f"User: {user_input}\nBot: {full_response}\n"
-    session_histories[session_id] = chat_history
-
     return {"response": full_response}
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
