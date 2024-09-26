@@ -39,18 +39,41 @@ def scrape_wikipedia(topic: str) -> List[Dict[str, str]]:
         })
     except wikipedia.exceptions.DisambiguationError as e:
         print(f"Disambiguation error: {e.options}")
+        # Optionally let the user choose or retry
+        choice = input("Choose one of the options above or type 'retry' to enter a new topic: ").strip()
+        if choice.lower() == 'retry':
+            new_topic = input("Enter the new topic to search on Wikipedia: ")
+            return scrape_wikipedia(new_topic)
+        elif choice in e.options:
+            return scrape_wikipedia(choice)
+        else:
+            print("Invalid choice. Please try again.")
     except wikipedia.exceptions.PageError:
         print(f"Page not found for {topic}")
     return items
 
 def read_csv_file(file_path: str) -> List[Dict[str, str]]:
     items = []
+    if not os.path.exists(file_path):
+        print(f"CSV file not found at {file_path}. Please enter a valid path.")
+        return items
+
     with open(file_path, 'r') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            row['source'] = 'csv'
-            items.append(row)
+            # Creating a concatenated content for embedding
+            content = (f"Museum Name: {row['Museum Name']}, Location: {row['Location']}, City: {row['City']}, "
+                       f"Type: {row['Type']}, Year Established: {row['Year Established']}, Visitors per Year: {row['Visitors per Year']}, "
+                       f"Child Entry Fee: {row['Child Entry Fee']}, Adult Entry Fee: {row['Adult Entry Fee']}, "
+                       f"Opening Time: {row['Opening Time']}, Closing Time: {row['Closing Time']}")
+            
+            items.append({
+                "title": row['Museum Name'],  # The museum name will be the 'title'
+                "content": content,            # All combined information will be the 'content'
+                "source": 'csv'                # Mark it as a CSV source
+            })
     return items
+
 
 def store_in_supabase(items: List[Dict[str, str]], table_name: str):
     for item in items:
