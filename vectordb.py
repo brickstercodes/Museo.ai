@@ -1,18 +1,19 @@
 import wikipedia
-from typing import List, Dict
+from typing import List, Dict, Union
 import os
 import google.generativeai as genai
 from supabase import create_client, Client
 import csv
+from dotenv import load_dotenv
+import asyncio
+
+load_dotenv("/Users/anugrahshetty/Desktop/Local e3/apiKeys.env")
 
 # Configure Gemini API
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-genai.configure(api_key=GOOGLE_API_KEY)
+genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
 # Configure Supabase
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY")
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+supabase: Client = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
 
 def generate_embedding(text: str) -> list:
     embedding = genai.embed_content(
@@ -74,19 +75,37 @@ def read_csv_file(file_path: str) -> List[Dict[str, str]]:
             })
     return items
 
+async def store_in_supabase(item: Union[str, List[Dict[str, str]]], embedding: Union[list, None] = None, table_name: str = "table1"):
+    try:
+        if isinstance(item, str):
+            # Single item case (used in chat)
+            data = {
+                "content": item,
+                "embed": embedding,
+                "source": "chat"
+            }
+            result = supabase.table(table_name).insert(data).execute()
+            return {"success": True, "data": result.data}
+        elif isinstance(item, list):
+            # Multiple items case (used in data ingestion)
+            data = []
+            for i in item:
+                content = f"{i.get('title', '')} {i.get('content', '')}"
+                embed = generate_embedding(content) if embedding is None else embedding
+                data.append({
+                    "title": i.get('title', ''),
+                    "content": i.get('content', ''),
+                    "source": i.get('source', ''),
+                    "embed": embed
+                })
+            result = supabase.table(table_name).insert(data).execute()
+            return {"success": True, "data": result.data}
+        else:
+            raise ValueError("Invalid input type. Expected string or list of dictionaries.")
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 
-def store_in_supabase(items: List[Dict[str, str]], table_name: str):
-    for item in items:
-        content = f"{item.get('title', '')} {item.get('content', '')}"
-        embedding = generate_embedding(content)
-        supabase.table(table_name).insert({
-            "title": item.get('title', ''),
-            "content": item.get('content', ''),
-            "source": item.get('source', ''),
-            "embed": embedding
-        }).execute()
-
-def main():
+async def main():
     table_name = "table1"  # Use the existing table name
 
     # Choose data source
@@ -102,7 +121,11 @@ def main():
         print("Invalid source. Please choose 'wikipedia' or 'csv'.")
         return
 
-    store_in_supabase(items, table_name)
+    result = await store_in_supabase(items, table_name=table_name)
+    if result["success"]:
+        print("Data successfully stored in Supabase")
+    else:
+        print(f"Failed to store data in Supabase: {result['error']}")
     
     # Print the results
     for item in items:
@@ -112,4 +135,4 @@ def main():
         print()
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
