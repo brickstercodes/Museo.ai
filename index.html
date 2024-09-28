@@ -3,108 +3,169 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Google Maps Directions</title>
+    <title>Museo AI Chat</title>
     <style>
-      #map {
-        height: 400px;
-        width: 100%;
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f0f0f0;
       }
-      #directions {
-        margin-top: 20px;
+      .chat-container {
+        width: 400px;
+        height: 600px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        display: flex;
+        flex-direction: column;
+        background-color: white;
+      }
+      .chat-messages {
+        flex-grow: 1;
+        overflow-y: auto;
+        padding: 10px;
+      }
+      .message {
+        margin-bottom: 10px;
+        padding: 5px 10px;
+        border-radius: 5px;
+        max-width: 70%;
+      }
+      .user-message {
+        background-color: #007bff;
+        color: white;
+        align-self: flex-end;
+      }
+      .ai-message {
+        background-color: #f1f0f0;
+        color: black;
+        align-self: flex-start;
+      }
+      .chat-input {
+        display: flex;
+        padding: 10px;
+        border-top: 1px solid #ccc;
+      }
+      #message-input {
+        flex-grow: 1;
+        padding: 5px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+      }
+      #send-button {
+        margin-left: 10px;
+        padding: 5px 10px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
       }
     </style>
   </head>
   <body>
-    <h1>Google Maps Directions</h1>
-    <div>
-      <label for="origin">Origin:</label>
-      <input type="text" id="origin" name="origin" required />
+    <div class="chat-container">
+      <div class="chat-messages" id="chat-messages"></div>
+      <div class="chat-input">
+        <input
+          type="text"
+          id="message-input"
+          placeholder="Type your message..."
+        />
+        <button id="send-button">Send</button>
+      </div>
     </div>
-    <div>
-      <label for="destination">Destination:</label>
-      <input type="text" id="destination" name="destination" required />
-    </div>
-    <button onclick="getDirections()">Get Directions</button>
-    <div id="map"></div>
-    <div id="directions"></div>
 
     <script>
-      let map;
-      let directionsService;
-      let directionsRenderer;
+      const chatMessages = document.getElementById("chat-messages");
+      const messageInput = document.getElementById("message-input");
+      const sendButton = document.getElementById("send-button");
 
-      async function initMap() {
-        const response = await fetch("http://localhost:8000/api_key");
-        const data = await response.json();
-        const apiKey = data.api_key;
+      const sessionId = Math.random().toString(36).substring(2, 15);
+      const socket = new WebSocket("ws://localhost:8000/ws/chat");
 
-        const script = document.createElement("script");
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initializeMap&libraries=places`;
-        script.async = true;
-        document.head.appendChild(script);
-      }
+      let currentAiMessage = "";
+      let aiMessageElement = null;
 
-      function initializeMap() {
-        const defaultLocation = { lat: 40.7128, lng: -74.006 }; // New York City
-        map = new google.maps.Map(document.getElementById("map"), {
-          zoom: 7,
-          center: defaultLocation,
-        });
+      socket.onopen = () => {
+        console.log("WebSocket connection established");
+        addMessage(
+          "System",
+          "Connected to Museo AI. How can I help you today?",
+          "ai-message"
+        );
+      };
 
-        directionsService = new google.maps.DirectionsService();
-        directionsRenderer = new google.maps.DirectionsRenderer();
-        directionsRenderer.setMap(map);
-      }
+      socket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.delta) {
+          currentAiMessage += data.delta;
 
-      async function getDirections() {
-        const origin = document.getElementById("origin").value;
-        const destination = document.getElementById("destination").value;
+          // Update or create the AI message element
+          if (!aiMessageElement) {
+            aiMessageElement = document.createElement("div");
+            aiMessageElement.classList.add("message", "ai-message");
+            chatMessages.appendChild(aiMessageElement);
+          }
 
-        const response = await fetch("http://localhost:8000/get_directions", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ origin, destination }),
-        });
+          aiMessageElement.textContent = `Museo AI: ${currentAiMessage}`;
+          chatMessages.scrollTop = chatMessages.scrollHeight;
 
-        const data = await response.json();
+          // Check if we've received a complete sentence or chunk
+          if (
+            data.delta.includes(".") ||
+            data.delta.includes("?") ||
+            data.delta.includes("!")
+          ) {
+            aiMessageElement = null; // Reset for the next message
+            currentAiMessage = "";
+          }
+        } else if (data.error) {
+          addMessage("System", `Error: ${data.error}`, "ai-message");
+        }
+      };
 
-        if (response.ok) {
-          displayDirections(data);
-          renderRoute(origin, destination);
-        } else {
-          alert("Error: " + data.detail);
+      socket.onclose = () => {
+        console.log("WebSocket connection closed");
+        addMessage("System", "Disconnected from Museo AI.", "ai-message");
+      };
+
+      sendButton.onclick = sendMessage;
+      messageInput.onkeypress = (e) => {
+        if (e.key === "Enter") {
+          sendMessage();
+        }
+      };
+
+      function sendMessage() {
+        const message = messageInput.value.trim();
+        if (message) {
+          addMessage("You", message, "user-message");
+          socket.send(
+            JSON.stringify({
+              message: message,
+              session_id: sessionId,
+            })
+          );
+          messageInput.value = "";
+
+          // Reset AI message accumulation
+          currentAiMessage = "";
+          aiMessageElement = null;
         }
       }
 
-      function displayDirections(data) {
-        const directionsDiv = document.getElementById("directions");
-        directionsDiv.innerHTML = `
-                <h2>Directions</h2>
-                <p>Distance: ${data.distance}</p>
-                <p>Duration: ${data.duration}</p>
-                <ol>
-                    ${data.steps.map((step) => `<li>${step}</li>`).join("")}
-                </ol>
-            `;
+      function addMessage(sender, message, className) {
+        const messageElement = document.createElement("div");
+        messageElement.classList.add("message", className);
+        messageElement.textContent = `${sender}: ${message}`;
+        chatMessages.appendChild(messageElement);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
       }
-
-      function renderRoute(origin, destination) {
-        const request = {
-          origin: origin,
-          destination: destination,
-          travelMode: "DRIVING",
-        };
-
-        directionsService.route(request, function (result, status) {
-          if (status === "OK") {
-            directionsRenderer.setDirections(result);
-          }
-        });
-      }
-
-      initMap();
     </script>
   </body>
 </html>
