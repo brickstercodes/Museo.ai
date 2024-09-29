@@ -3,169 +3,338 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Museo AI Chat</title>
+    <!-- <link rel="stylesheet" href="style.css"> -->
+    <script
+      src="https://kit.fontawesome.com/d0372757ab.js"
+      crossorigin="anonymous"
+    ></script>
+    <title>Museo AI</title>
+
     <style>
-      body {
-        font-family: Arial, sans-serif;
+      * {
         margin: 0;
         padding: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        background-color: #f0f0f0;
+        box-sizing: border-box;
+        font-family: Georgia, "Times New Roman", Times, serif;
       }
-      .chat-container {
-        width: 400px;
-        height: 600px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
+
+      @font-face {
+        font-family: "MyCustomFont";
+        src: url("HV Fitzgerald Italic.ttf") format("truetype");
+        font-weight: normal;
+        font-style: normal;
+      }
+
+      body {
+        background-color: #30a8c3;
+        color: white;
+        height: 100vh;
         display: flex;
         flex-direction: column;
-        background-color: white;
+        background-image: url("new_home.svg");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
       }
-      .chat-messages {
-        flex-grow: 1;
-        overflow-y: auto;
-        padding: 10px;
+      /* ... (previous styles remain unchanged) ... */
+
+      /* New styles for the centered bottom image */
+      .centered-bottom-image {
+        position: fixed;
+        bottom: 20px; /* Adjust this value to control distance from bottom */
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 10; /* Ensure it's above other content but below the book now button */
       }
-      .message {
-        margin-bottom: 10px;
-        padding: 5px 10px;
-        border-radius: 5px;
-        max-width: 70%;
+
+      .centered-bottom-image img {
+        max-width: 300px; /* Adjust this value to control the image size */
+        height: auto;
+        display: block;
       }
-      .user-message {
-        background-color: #007bff;
-        color: white;
-        align-self: flex-end;
+
+      /* Adjust the book-now-container to ensure it doesn't overlap with the new image */
+      .book-now-container {
+        bottom: 150px; /* Increased to make room for the new image */
       }
-      .ai-message {
-        background-color: #f1f0f0;
-        color: black;
-        align-self: flex-start;
+
+      /* Optional: Adjust other elements if needed */
+      .para {
+        padding-bottom: 200px; /* Increased to make room for the new image */
       }
-      .chat-input {
+
+      header {
+        padding: 20px 50px;
+        background-color: #00123a;
+        font-size: 18px;
+        font-weight: 400;
+      }
+      a {
+        text-decoration: none;
+        color: #f8f2be;
+      }
+      .navbar {
         display: flex;
-        padding: 10px;
-        border-top: 1px solid #ccc;
+        justify-content: space-between;
+        align-items: center;
       }
-      #message-input {
-        flex-grow: 1;
-        padding: 5px;
-        border: 1px solid #ccc;
-        border-radius: 3px;
+      ul {
+        display: flex;
+        flex-direction: row;
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+        gap: 30px;
       }
-      #send-button {
-        margin-left: 10px;
-        padding: 5px 10px;
-        background-color: #007bff;
-        color: white;
+      .left-items {
+        justify-content: space-around;
+      }
+      .left .items i {
+        margin-right: 10px;
+      }
+      .center-logo img {
+        height: 30px;
+        margin-left: -40px;
+      }
+      .auth-buttons {
+        display: flex;
+        align-items: right;
+        border: 2px solid #f8f2be;
+        border-radius: 30px;
+        padding: 0px;
+        background: #00123a;
+      }
+
+      .auth-buttons .login-btn,
+      .signup-btn {
+        padding: 10px 20px;
+        border-radius: 20px;
         border: none;
-        border-radius: 3px;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: bold;
+        cursor: pointer; /* Added cursor property */
+      }
+
+      .btn-login {
+        background-color: #002262;
+        color: #fff;
+        padding: 12px;
+        border: none;
+        border-radius: 10px;
+        font-size: 16px;
         cursor: pointer;
+        width: 100%;
+        margin-top: 10px;
+        cursor: pointer;
+      }
+
+      .btn-login:hover {
+        background-color: #0e45c2;
+        cursor: pointer;
+      }
+
+      .signup-btn {
+        background: #f8f2be;
+        color: black;
+        margin-left: -5px; /* Overlaps with the login button */
+      }
+
+      /* Fullscreen Section */
+      .hero {
+        display: flex;
+        padding-top: 90px; /* Centers content vertically */
+        left: 60px;
+        z-index: -2;
+        height: 100vh; /* Fullscreen height */
+        padding-left: 30px; /* Adds space between the text and the screen's left edge */
+      }
+
+      /* Text Styling */
+      .hero-text h1 {
+        color: #edeec9; /* Light text color */
+        font-size: 2.5rem; /* Adjust font size */
+        line-height: 1.2; /* Adjust spacing between lines */
+        font-weight: bold;
+      }
+
+      .hero-text h1 span {
+        display: block;
+        color: #ffd700; /* Optional highlight color for certain words */
+      }
+
+      .hero-text {
+        max-width: 48%; /* Limits width of the text block */
+      }
+      /* Container to hold the button */
+      .book-now-container {
+        position: absolute; /* Sticks it to the viewport */
+        bottom: 100px; /* Distance from the bottom of the screen */
+        right: 80px; /* Moves it to the right side */
+      }
+
+      .booky {
+        z-index: -2;
+      }
+      /* Button styling */
+      .book-now-btn {
+        background-color: #edeec9; /* Light background color */
+        color: #0a0a3b; /* Dark text color */
+        font-size: 2rem; /* Increased font size */
+        padding: 20px 50px 20px 100px; /* Increased padding for a larger button */
+        border: none;
+        border-radius: 50px; /* Rounded edges */
+        font-weight: bold;
+        cursor: pointer; /* Added cursor property */
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Optional shadow for depth */
+        z-index: -2;
+        position: relative;
+      }
+
+      .book-now-btn:hover {
+        opacity: 0.9; /* Slight hover effect */
+        cursor: pointer;
+      }
+
+      .trans-btn {
+        position: absolute;
+        top: 5px; /* Adjust to overlap as needed */
+        left: 20px; /* Adjust to overlap as needed */
+        z-index: 2; /* Higher z-index to control stacking order */
+        background-color: transparent;
+        color: transparent;
+        width: 300px;
+        height: 70px;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      .para {
+        display: flex;
+        margin-top: 220px;
+        padding-top: 0;
+        padding-bottom: 0;
+        right: 50px;
+        position: absolute;
+      }
+      .para h3 {
+        font-size: 20px;
+        letter-spacing: 1px;
+        font-weight: 400;
+        z-index: -2;
+        color: #f8f2be;
+        font-family: "MyCustomFont";
+      }
+      .para span {
+        font-weight: 600;
+      }
+
+      .main-image {
+        display: flex;
+        justify-content: center;
+        margin-top: -500px;
+        height: 800px;
+        width: auto;
+        z-index: -1;
+        margin-left: 80px;
+        opacity: 1;
+      }
+
+      .book-now-container a {
+        color: #00123a;
+      }
+
+      .dropdown {
+        position: relative;
+        display: inline-block;
+      }
+
+      .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: #00123a;
+        min-width: 160px;
+        box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+        z-index: 1;
+        border-radius: 5px;
+      }
+
+      .dropdown-content a {
+        color: #f8f2be;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+      }
+
+      dropdown-content a:hover {
+        background-color: #002a5a;
+      }
+
+      .dropdown:hover .dropdown-content {
+        display: block;
       }
     </style>
   </head>
   <body>
-    <div class="chat-container">
-      <div class="chat-messages" id="chat-messages"></div>
-      <div class="chat-input">
-        <input
-          type="text"
-          id="message-input"
-          placeholder="Type your message..."
-        />
-        <button id="send-button">Send</button>
+    <header>
+      <div class="navbar">
+        <ul class="left">
+          <li class="items dropdown">
+            <a href="#" id="languageDropdown"
+              ><i class="fas fa-globe"></i>Language</a
+            >
+            <div class="dropdown-content" id="languageMenu">
+              <a href="#">English</a>
+              <a href="#">Español</a>
+              <a href="#">Français</a>
+              <a href="#">Deutsch</a>
+            </div>
+          </li>
+          <a href="#"><li class="items">About Us</li></a>
+          <a href="#"><li class="items">Contact Us</li></a>
+        </ul>
+        <div class="center-logo">
+          <a href="index.html"><img src="Vector 1506.svg" /></a>
+        </div>
+        <div class="auth-buttons">
+          <a href="login.html" class="login-btn">Login</a>
+          <a href="signup.html" class="signup-btn">Sign Up</a>
+        </div>
       </div>
+    </header>
+
+    <!--Main-->
+    <section class="hero">
+      <div class="hero-text">
+        <h1>
+          BOOK <br />
+          YOUR MUSEUM EXPERIENCE <br />
+          SEAMLESSLY.
+        </h1>
+      </div>
+    </section>
+    <div class="para">
+      <h3>
+        Welcome to <span><i>Museo!</i></span> <br />
+        Skip the lines and book your museum tickets in a <br />
+        flash with museo! <span><i>Fast, easy, and available 24/7—</i></span
+        >just <br />
+        like magic. <br /><br />
+        Explore exhibits, grab your tickets, and enjoy your visit without the
+        wait.
+      </h3>
     </div>
-
-    <script>
-      const chatMessages = document.getElementById("chat-messages");
-      const messageInput = document.getElementById("message-input");
-      const sendButton = document.getElementById("send-button");
-
-      const sessionId = Math.random().toString(36).substring(2, 15);
-      const socket = new WebSocket("ws://localhost:8000/ws/chat");
-
-      let currentAiMessage = "";
-      let aiMessageElement = null;
-
-      socket.onopen = () => {
-        console.log("WebSocket connection established");
-        addMessage(
-          "System",
-          "Connected to Museo AI. How can I help you today?",
-          "ai-message"
-        );
-      };
-
-      socket.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        if (data.delta) {
-          currentAiMessage += data.delta;
-
-          // Update or create the AI message element
-          if (!aiMessageElement) {
-            aiMessageElement = document.createElement("div");
-            aiMessageElement.classList.add("message", "ai-message");
-            chatMessages.appendChild(aiMessageElement);
-          }
-
-          aiMessageElement.textContent = `Museo AI: ${currentAiMessage}`;
-          chatMessages.scrollTop = chatMessages.scrollHeight;
-
-          // Check if we've received a complete sentence or chunk
-          if (
-            data.delta.includes(".") ||
-            data.delta.includes("?") ||
-            data.delta.includes("!")
-          ) {
-            aiMessageElement = null; // Reset for the next message
-            currentAiMessage = "";
-          }
-        } else if (data.error) {
-          addMessage("System", `Error: ${data.error}`, "ai-message");
-        }
-      };
-
-      socket.onclose = () => {
-        console.log("WebSocket connection closed");
-        addMessage("System", "Disconnected from Museo AI.", "ai-message");
-      };
-
-      sendButton.onclick = sendMessage;
-      messageInput.onkeypress = (e) => {
-        if (e.key === "Enter") {
-          sendMessage();
-        }
-      };
-
-      function sendMessage() {
-        const message = messageInput.value.trim();
-        if (message) {
-          addMessage("You", message, "user-message");
-          socket.send(
-            JSON.stringify({
-              message: message,
-              session_id: sessionId,
-            })
-          );
-          messageInput.value = "";
-
-          // Reset AI message accumulation
-          currentAiMessage = "";
-          aiMessageElement = null;
-        }
-      }
-
-      function addMessage(sender, message, className) {
-        const messageElement = document.createElement("div");
-        messageElement.classList.add("message", className);
-        messageElement.textContent = `${sender}: ${message}`;
-        chatMessages.appendChild(messageElement);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-      }
-    </script>
+    <div class="main-image">
+      <img src="SDCSDC.png" alt="" />
+    </div>
+    <div class="book-now-container">
+      <div class="booky">
+        <button class="book-now-btn">BOOK NOW</button>
+      </div>
+      <a href="chaty.html"><button class="trans-btn">BOOK NOW</button></a>
+    </div>
   </body>
 </html>
