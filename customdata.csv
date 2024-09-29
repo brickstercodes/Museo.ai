@@ -1,0 +1,11 @@
+Museum Name,Location,City,Type,Year Established,Visitors per Year,Child Entry Fee,Adult Entry Fee,Opening Time,Closing Time
+Museum Anugrah,Kandivali(East),Mumbai,Art,1990,50000,5,10,09:00,17:00
+Museum Parth,Colaba,Mumbai,History,1985,75000,7,15,10:00,18:00
+Museum Divyaprasad,Connaught Place,New Delhi,Science,2000,60000,6,12,09:30,17:30
+Museum Gaurang,MG Road,Bengaluru,Technology,1995,55000,5,10,10:00,18:00
+Museum Shalini,Park Street,Kolkata,Culture,1980,45000,4,8,09:00,17:00
+Museum Tanay,Anna Salai,Chennai,Art,1992,30000,3,5,10:00,18:00
+Museum G,Banjara Hills,Hyderabad,History,1988,4,4,7,09:30,17:30
+Museum H,Marine Drive,Mumbai,Science,2005,65000,5,10,09:00,17:00
+Museum I,Indiranagar,Bengaluru,Technology,1998,4,9,10:00,18:00
+Museum J,Esplanade,Kolkata,Culture,1975,3,6,09:00,17:00

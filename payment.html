@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MuseoPay - Bill Payment</title>
+    <style>
+      :root {
+        --primary-color: #1a469e;
+        --secondary-color: #f5f7ff;
+        --text-color: #2d3748;
+        --border-color: #e2e8f0;
+        --success-color: #38a169;
+        --error-color: #e53e3e;
+        --blue-bg: #00123a;
+        --beige-bg: #f8f2be;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        background-color: var(--blue-bg);
+        color: var(--text-color);
+        line-height: 1.6;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+      }
+      .container {
+        width: 100%;
+        max-width: 400px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background-color: var(--secondary-color);
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+      .logo {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: var(--primary-color);
+      }
+      .amount {
+        font-size: 2rem;
+        font-weight: bold;
+        margin: 1rem 0;
+        text-align: center;
+      }
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+      }
+      input,
+      select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        font-size: 1rem;
+        color: var(--text-color);
+        transition: all 0.3s ease;
+        background-color: var(--beige-bg);
+      }
+      input:focus,
+      select:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px rgba(0, 82, 255, 0.2);
+      }
+      .btn {
+        display: block;
+        width: 100%;
+        padding: 0.75rem;
+        background-color: var(--primary-color);
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        font-size: 1rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+      .btn:hover {
+        background-color: #0043cc;
+        transform: translateY(-2px);
+      }
+      .btn:active {
+        transform: translateY(0);
+      }
+      .btn:disabled {
+        background-color: #a0aec0;
+        cursor: not-allowed;
+      }
+      .error {
+        color: var(--error-color);
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+      }
+      .success {
+        color: var(--success-color);
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+      }
+      .payment-options {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+      }
+      .payment-option {
+        flex: 1;
+        text-align: center;
+        padding: 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background-color: var(--beige-bg);
+      }
+      .payment-option:hover,
+      .payment-option.active {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        transform: translateY(-2px);
+      }
+      .payment-option img {
+        width: 48px;
+        height: 48px;
+        margin-bottom: 0.5rem;
+        transition: all 0.3s ease;
+      }
+      .payment-option:hover img {
+        transform: scale(1.1);
+      }
+      .pin-input {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+      }
+      .pin-digit {
+        width: 40px;
+        height: 40px;
+        border: 2px solid var(--primary-color);
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 24px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        background-color: #ffffff;
+      }
+      .pin-digit.filled {
+        background-color: var(--primary-color);
+        color: #fff;
+      }
+      .keypad {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+      }
+      .key {
+        background-color: #ffffff;
+        border: 1px solid var(--border-color);
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+        font-weight: bold;
+        color: var(--text-color);
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+      .key:hover {
+        background-color: var(--secondary-color);
+        transform: translateY(-2px);
+      }
+      .key:active {
+        background-color: var(--primary-color);
+        color: #fff;
+        transform: translateY(0);
+      }
+      .hidden {
+        display: none;
+      }
+      .payment-images {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 1rem;
+      }
+      .payment-images img {
+        max-width: 100%;
+        height: auto;
+        margin: 0 0.5rem;
+        transition: all 0.3s ease;
+      }
+      .payment-images img:hover {
+        transform: scale(1.05);
+      }
+      .forgot-password {
+        text-align: right;
+        margin-top: 0.5rem;
+      }
+      .forgot-password a {
+        color: var(--primary-color);
+        text-decoration: none;
+        transition: all 0.3s ease;
+      }
+      .forgot-password a:hover {
+        text-decoration: underline;
+        color: #0043cc;
+      }
+      .page-transition {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.3s ease, transform 0.3s ease;
+      }
+      .page-transition.active {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      @keyframes success-animation {
+        0% {
+          transform: scale(0.8);
+          opacity: 0;
+        }
+        50% {
+          transform: scale(1.2);
+          opacity: 1;
+        }
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+      .success-icon {
+        animation: success-animation 0.5s ease-out;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header class="header">
+        <div class="logo">MuseoPay</div>
+      </header>
+
+      <div id="main-page" class="page-transition active">
+        <div class="amount" id="payment-amount">₹0.00</div>
+        <div class="payment-options">
+          <div class="payment-option" data-option="upi">
+            <img src="UPI-Color.svg" alt="UPI" />
+            <div>UPI</div>
+          </div>
+          <div class="payment-option" data-option="card">
+            <img src="iconmonstr-credit-card-thin.svg" alt="Card" />
+            <div>Card</div>
+          </div>
+          <div class="payment-option" data-option="netbanking">
+            <img src="online-banking-svgrepo-com.svg" alt="Net Banking" />
+            <div>Net Banking</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="upi-page" class="page-transition hidden">
+        <div class="amount">₹2,500.00</div>
+        <form id="upi-form">
+          <div class="form-group">
+            <label for="upi-id">UPI ID</label>
+            <input
+              type="text"
+              id="upi-id"
+              placeholder="yourname@upi"
+              required
+            />
+            <div class="error" id="upi-id-error"></div>
+          </div>
+          <button type="submit" class="btn">Pay Now</button>
+        </form>
+      </div>
+
+      <div id="upi-pin-page" class="page-transition hidden">
+        <div class="amount">₹2,500.00</div>
+        <div class="pin-input" id="pin-display">
+          <div class="pin-digit"></div>
+          <div class="pin-digit"></div>
+          <div class="pin-digit"></div>
+          <div class="pin-digit"></div>
+          <div class="pin-digit"></div>
+          <div class="pin-digit"></div>
+        </div>
+        <div class="error" id="pin-error"></div>
+        <div class="keypad">
+          <button class="key">1</button>
+          <button class="key">2</button>
+          <button class="key">3</button>
+          <button class="key">4</button>
+          <button class="key">5</button>
+          <button class="key">6</button>
+          <button class="key">7</button>
+          <button class="key">8</button>
+          <button class="key">9</button>
+          <button class="key" id="clear-key">C</button>
+          <button class="key">0</button>
+          <button class="key" id="submit-key">✓</button>
+        </div>
+      </div>
+
+      <div id="card-page" class="page-transition hidden">
+        <div class="amount">₹2,500.00</div>
+        <div class="payment-images">
+          <img
+            src="iconmonstr-credit-card-thin.svg"
+            alt="Credit/Debit Cards"
+            width="200"
+          />
+        </div>
+        <form id="card-form">
+          <div class="form-group">
+            <label for="card-number">Card Number</label>
+            <input
+              type="text"
+              id="card-number"
+              placeholder="1234 5678 9012 3456"
+              maxlength="19"
+              required
+            />
+            <div class="error" id="card-number-error"></div>
+          </div>
+          <div class="form-group">
+            <label for="card-name">Name on Card</label>
+            <input type="text" id="card-name" placeholder="John Doe" required />
+            <div class="error" id="card-name-error"></div>
+          </div>
+          <div class="form-group">
+            <label for="expiry-date">Expiry Date</label>
+            <input
+              type="text"
+              id="expiry-date"
+              placeholder="MM/YY"
+              maxlength="5"
+              required
+            />
+            <div class="error" id="expiry-date-error"></div>
+          </div>
+          <div class="form-group">
+            <label for="cvv">CVV</label>
+            <input
+              type="text"
+              id="cvv"
+              placeholder="123"
+              maxlength="3"
+              required
+            />
+            <div class="error" id="cvv-error"></div>
+          </div>
+          <button type="submit" class="btn">Pay Now</button>
+        </form>
+      </div>
+
+      <div id="netbanking-page" class="page-transition hidden">
+        <div class="amount">₹2,500.00</div>
+        <div class="payment-images">
+          <img
+            src="online-banking-svgrepo-com.svg"
+            alt="Net Banking"
+            width="200"
+          />
+        </div>
+        <form id="netbanking-form">
+          <div class="form-group">
+            <label for="bank-select">Select Your Bank</label>
+            <select id="bank-select" required>
+              <option value="">Choose a bank</option>
+              <option value="sbi">State Bank of India</option>
+              <option value="hdfc">HDFC Bank</option>
+              <option value="icici">ICICI Bank</option>
+              <option value="axis">Axis Bank</option>
+              <option value="pnb">Punjab National Bank</option>
+              <option value="other">Other Banks</option>
+            </select>
+            <div class="error" id="bank-select-error"></div>
+          </div>
+          <div class="form-group">
+            <label for="bank-id">User ID</label>
+            <input type="text" id="bank-id" required />
+            <div class="error" id="bank-id-error"></div>
+          </div>
+          <div class="form-group">
+            <label for="bank-password">Password</label>
+            <input type="password" id="bank-password" required />
+            <div class="error" id="bank-password-error"></div>
+          </div>
+          <div class="forgot-password">
+            <a href="#" id="forgot-password-link">Forgot Password?</a>
+          </div>
+          <button type="submit" class="btn">Proceed to Pay</button>
+        </form>
+      </div>
+
+      <div id="success-page" class="page-transition hidden">
+        <div class="success-icon">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="64"
+            height="64"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="feather feather-check-circle"
+          >
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+        </div>
+        <div class="success">Payment Successful!</div>
+        <div class="amount">₹2,500.00</div>
+        <div>Transaction ID: <span id="transaction-id"></span></div>
+        <a href="chaty.html"
+          ><button class="btn" id="back-to-main">Back to Chat</button></a
+        >
+      </div>
+    </div>
+    <script>
+      // Retrieve the payment amount from localStorage
+      const paymentAmount = localStorage.getItem("paymentAmount");
+
+      // Display the payment amount
+      if (paymentAmount !== null) {
+        document.getElementById("payment-amount").textContent = `₹${parseFloat(
+          paymentAmount
+        ).toFixed(2)}`;
+      } else {
+        document.getElementById("payment-amount").textContent = "₹0.00";
+      }
+
+      // Update the displayed payment amount when the page loads
+      window.addEventListener("load", async () => {
+        const amount = await fetchPaymentAmount();
+        if (amount !== null) {
+          const amountElements = document.querySelectorAll(".amount");
+          amountElements.forEach((el) => {
+            el.textContent = `₹${amount.toFixed(2)}`;
+          });
+        } else {
+          // Handle the case where amount couldn't be fetched
+          document.querySelectorAll(".amount").forEach((el) => {
+            el.textContent = "₹0.00"; // Default to 0.00 on error
+          });
+        }
+      });
+
+      // Navigation
+      const pages = [
+        "main-page",
+        "upi-page",
+        "upi-pin-page",
+        "card-page",
+        "netbanking-page",
+        "success-page",
+      ];
+      function showPage(pageId) {
+        pages.forEach((page) => {
+          const element = document.getElementById(page);
+          element.classList.remove("active");
+          setTimeout(() => {
+            element.classList.add("hidden");
+          }, 300);
+        });
+        setTimeout(() => {
+          const newPage = document.getElementById(pageId);
+          newPage.classList.remove("hidden");
+          setTimeout(() => {
+            newPage.classList.add("active");
+          }, 50);
+        }, 300);
+      }
+
+      // Main page
+      document.querySelectorAll(".payment-option").forEach((option) => {
+        option.addEventListener("click", () => {
+          const paymentMethod = option.dataset.option;
+          showPage(`${paymentMethod}-page`);
+        });
+      });
+
+      // UPI page
+      const upiForm = document.getElementById("upi-form");
+      upiForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const upiId = document.getElementById("upi-id").value;
+        if (validateUpiId(upiId)) {
+          showPage("upi-pin-page");
+        } else {
+          document.getElementById("upi-id-error").textContent =
+            "Invalid UPI ID";
+        }
+      });
+
+      function validateUpiId(upiId) {
+        const upiRegex = /^[\w.-]+@[\w.-]+$/;
+        return upiRegex.test(upiId);
+      }
+
+      // UPI PIN page
+      let pinLength = 0;
+      const pinDisplay = document.getElementById("pin-display");
+      const pinError = document.getElementById("pin-error");
+
+      document.querySelectorAll(".key").forEach((key) => {
+        key.addEventListener("click", () => {
+          if (key.textContent >= "0" && key.textContent <= "9") {
+            addDigit(key.textContent);
+          }
+        });
+      });
+
+      document.getElementById("clear-key").addEventListener("click", clearPin);
+      document
+        .getElementById("submit-key")
+        .addEventListener("click", submitPin);
+
+      function addDigit(digit) {
+        if (pinLength < 6) {
+          pinLength++;
+          updatePinDisplay();
+          pinError.textContent = "";
+        }
+      }
+
+      function clearPin() {
+        pinLength = 0;
+        updatePinDisplay();
+        pinError.textContent = "";
+      }
+
+      function updatePinDisplay() {
+        const digits = pinDisplay.children;
+        for (let i = 0; i < digits.length; i++) {
+          if (i < pinLength) {
+            digits[i].textContent = "•";
+            digits[i].classList.add("filled");
+          } else {
+            digits[i].textContent = "";
+            digits[i].classList.remove("filled");
+          }
+        }
+      }
+
+      function submitPin() {
+        if (pinLength === 6) {
+          showSuccessPage();
+        } else {
+          pinError.textContent = "Please enter a 6-digit PIN";
+        }
+      }
+
+      // Card page
+      const cardForm = document.getElementById("card-form");
+      cardForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        if (validateCardForm()) {
+          showSuccessPage();
+        }
+      });
+
+      function validateCardForm() {
+        let isValid = true;
+        const cardNumber = document.getElementById("card-number").value;
+        const cardName = document.getElementById("card-name").value;
+        const expiryDate = document.getElementById("expiry-date").value;
+        const cvv = document.getElementById("cvv").value;
+
+        if (!/^\d{4}\s\d{4}\s\d{4}\s\d{4}$/.test(cardNumber)) {
+          document.getElementById("card-number-error").textContent =
+            "Invalid card number";
+          isValid = false;
+        } else {
+          document.getElementById("card-number-error").textContent = "";
+        }
+
+        if (cardName.trim().length < 3) {
+          document.getElementById("card-name-error").textContent =
+            "Invalid name";
+          isValid = false;
+        } else {
+          document.getElementById("card-name-error").textContent = "";
+        }
+
+        if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(expiryDate)) {
+          document.getElementById("expiry-date-error").textContent =
+            "Invalid expiry date";
+          isValid = false;
+        } else {
+          document.getElementById("expiry-date-error").textContent = "";
+        }
+
+        if (!/^\d{3}$/.test(cvv)) {
+          document.getElementById("cvv-error").textContent = "Invalid CVV";
+          isValid = false;
+        } else {
+          document.getElementById("cvv-error").textContent = "";
+        }
+
+        return isValid;
+      }
+
+      // Net Banking page
+      const netbankingForm = document.getElementById("netbanking-form");
+      netbankingForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const bankSelect = document.getElementById("bank-select");
+        const bankId = document.getElementById("bank-id");
+        const bankPassword = document.getElementById("bank-password");
+        let isValid = true;
+
+        if (!bankSelect.value) {
+          document.getElementById("bank-select-error").textContent =
+            "Please select a bank";
+          isValid = false;
+        } else {
+          document.getElementById("bank-select-error").textContent = "";
+        }
+
+        if (!bankId.value) {
+          document.getElementById("bank-id-error").textContent =
+            "Please enter your User ID";
+          isValid = false;
+        } else {
+          document.getElementById("bank-id-error").textContent = "";
+        }
+
+        if (!bankPassword.value) {
+          document.getElementById("bank-password-error").textContent =
+            "Please enter your password";
+          isValid = false;
+        } else {
+          document.getElementById("bank-password-error").textContent = "";
+        }
+
+        if (isValid) {
+          showSuccessPage();
+        }
+      });
+
+      document
+        .getElementById("forgot-password-link")
+        .addEventListener("click", (e) => {
+          e.preventDefault();
+          alert("Please contact your bank to reset your password.");
+        });
+
+      // Success page
+      function showSuccessPage() {
+        const transactionId =
+          "TXN" + Math.random().toString(36).substr(2, 9).toUpperCase();
+        document.getElementById("transaction-id").textContent = transactionId;
+        showPage("success-page");
+      }
+
+      document.getElementById("back-to-main").addEventListener("click", () => {
+        showPage("main-page");
+      });
+
+      // Input formatting
+      document.getElementById("card-number").addEventListener("input", (e) => {
+        e.target.value = e.target.value
+          .replace(/\D/g, "")
+          .replace(/(\d{4})/g, "$1 ")
+          .trim();
+      });
+
+      document.getElementById("expiry-date").addEventListener("input", (e) => {
+        e.target.value = e.target.value
+          .replace(/\D/g, "")
+          .replace(/^(\d{2})/, "$1/")
+          .slice(0, 5);
+      });
+    </script>
+  </body>
+</html>

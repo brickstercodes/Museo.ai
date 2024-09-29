@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    />
+    <script
+      src="https://kit.fontawesome.com/d0372757ab.js"
+      crossorigin="anonymous"
+    ></script>
+    <title>Museo AI Chat</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: Georgia, "Times New Roman", Times, serif;
+      }
+
+      body {
+        background-color: #30a8c3;
+        color: white;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background-image: url("chatpage.png");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+      }
+
+      header {
+        padding: 20px 50px;
+        background-color: #00123a;
+        font-size: 18px;
+        font-weight: 400;
+      }
+
+      a {
+        text-decoration: none;
+        color: #f8f2be;
+      }
+
+      .navbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      ul {
+        display: flex;
+        flex-direction: row;
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+        gap: 30px;
+      }
+
+      .left-items {
+        justify-content: space-around;
+      }
+
+      .center-logo img {
+        height: 30px;
+        margin-left: -40px;
+      }
+
+      .left span {
+        color: #f8f2be;
+      }
+
+      .left .items i {
+        margin-right: 10px;
+      }
+
+      .pay-btn {
+        margin-left: 1290px;
+      }
+
+      .pay-btn button {
+        font-size: 20px;
+        border-radius: 30px;
+        padding: 10px;
+        background-color: #dfdcb1;
+        color: #00123a;
+      }
+      .auth-buttons {
+        display: flex;
+        align-items: right;
+        border: 2px solid #f8f2be;
+        border-radius: 30px;
+        padding: 0px;
+        background: #00123a;
+      }
+
+      .auth-buttons .login-btn,
+      .signup-btn {
+        padding: 10px 20px;
+        border-radius: 20px;
+        border: none;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: bold;
+      }
+
+      .login-btn {
+        color: #f8f2be;
+        background: #00123a;
+      }
+
+      .signup-btn {
+        background: #f8f2be;
+        color: black;
+        margin-left: -5px;
+      }
+
+      .greeting {
+        font-family: "Playfair Display", serif;
+        font-size: 2.5rem;
+        margin-bottom: 1.5rem;
+        text-shadow: 0 0 10px rgba(248, 242, 190, 0.3);
+        margin-left: 100px;
+        margin-top: 30px;
+      }
+
+      .greeting span {
+        font-weight: bolder;
+      }
+
+      .chat-container {
+        background-color: rgba(0, 18, 58, 0.8);
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 0 20px #f8f2be, 0 0 0 4px rgba(255, 255, 255, 0.1);
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        margin: 0 100px;
+        height: 400px;
+        max-height: 60vh;
+      }
+
+      .chat-messages {
+        flex-grow: 1;
+        overflow-y: auto;
+        padding: 10px;
+        scroll-behavior: smooth;
+      }
+
+      .chat-messages::-webkit-scrollbar {
+        width: 10px;
+      }
+
+      .chat-messages::-webkit-scrollbar-track {
+        background: rgba(248, 242, 190, 0.1);
+        border-radius: 5px;
+      }
+
+      .chat-messages::-webkit-scrollbar-thumb {
+        background: #f8f2be;
+        border-radius: 5px;
+      }
+
+      .chat-messages::-webkit-scrollbar-thumb:hover {
+        background: #e0d9a7;
+      }
+
+      .chat-messages {
+        scrollbar-width: thin;
+        scrollbar-color: #f8f2be rgba(248, 242, 190, 0.1);
+      }
+
+      .message {
+        margin-bottom: 10px;
+        padding: 10px;
+        border-radius: 10px;
+        max-width: 70%;
+        display: flex;
+        align-items: flex-start;
+      }
+
+      .user-message {
+        background-color: #dfdcb1;
+        color: black;
+        align-self: flex-end;
+        margin-left: auto;
+      }
+
+      .ai-message {
+        background-color: #f1f0f0;
+        color: black;
+        align-self: flex-start;
+      }
+
+      .avatar {
+        width: 30px;
+        height: 30px;
+        min-width: 30px;
+        min-height: 30px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-right: 10px;
+        overflow: hidden;
+        flex-shrink: 0;
+      }
+
+      .avatar svg {
+        width: 100%;
+        height: 100%;
+      }
+
+      .message-content {
+        flex-grow: 1;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+      }
+
+      .chat-input {
+        display: flex;
+        background-color: #f8f2be;
+        border-radius: 30px;
+        padding: 0.5rem;
+        margin: 20px 100px;
+      }
+
+      .chat-input input {
+        flex-grow: 1;
+        background: transparent;
+        border: none;
+        color: #00123a;
+        font-size: 1rem;
+        padding: 0.5rem 1rem;
+        outline: none;
+      }
+
+      .chat-input input::placeholder {
+        color: #00123a;
+        opacity: 0.5;
+      }
+
+      .send-button {
+        background: transparent;
+        border: none;
+        color: #00123a;
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0 0.5rem;
+      }
+
+      .main-content {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="navbar">
+        <!-- Navbar content -->
+      </div>
+    </header>
+
+    <div class="main-content">
+      <div class="greeting">
+        Hi there, <span>Anugrah</span><br />
+        Where do you want to visit today?
+      </div>
+      <div class="chat-container">
+        <div class="chat-messages" id="chat-messages"></div>
+      </div>
+      <div class="chat-input">
+        <input
+          type="text"
+          id="message-input"
+          placeholder="Start a Conversation"
+        />
+        <button class="send-button" id="send-button">➤</button>
+      </div>
+      <div class="pay-btn">
+        <a href="payment.html"><button>Pay Amount</button></a>
+      </div>
+    </div>
+
+    <script>
+      const chatMessages = document.getElementById("chat-messages");
+      const messageInput = document.getElementById("message-input");
+      const sendButton = document.getElementById("send-button");
+
+      const sessionId = Math.random().toString(36).substring(2, 15);
+      const socket = new WebSocket("ws://localhost:8000/ws/chat");
+
+      let currentAiMessage = "";
+      let aiMessageElement = null;
+
+      socket.onopen = () => {
+        console.log("WebSocket connection established");
+        addMessage(
+          "Museo AI",
+          "Connected to Museo AI. How can I help you today?",
+          "ai-message"
+        );
+      };
+
+      socket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+
+        if (data.delta) {
+          currentAiMessage += data.delta;
+
+          if (!aiMessageElement) {
+            aiMessageElement = document.createElement("div");
+            aiMessageElement.classList.add("message", "ai-message");
+            const avatar = document.createElement("div");
+            avatar.classList.add("avatar");
+            avatar.innerHTML = `
+          <svg width="77" height="43" viewBox="0 0 77 43" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M5 38.5L38 5M31.5 38.5L63.5 5M56.5 38.5L72 21" stroke="#00123a" stroke-width="9" stroke-linecap="round"/>
+          </svg>`;
+            const content = document.createElement("div");
+            content.classList.add("message-content");
+            aiMessageElement.appendChild(avatar);
+            aiMessageElement.appendChild(content);
+            chatMessages.appendChild(aiMessageElement);
+          }
+
+          aiMessageElement.querySelector(".message-content").textContent =
+            currentAiMessage;
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+          // Check if the message contains the redirect trigger
+          if (data.delta.includes("<REDIRECT_TO_PAYMENT>")) {
+            handleAIResponse(currentAiMessage);
+          }
+        } else if (data.error) {
+          addMessage("System", `Error: ${data.error}`, "ai-message");
+        }
+
+        if (data.finish) {
+          aiMessageElement = null;
+          currentAiMessage = "";
+
+          // Extract the booking amount if the message contains booking details
+          if (data.delta.includes("Booking Details:")) {
+            const amountMatch = data.delta.match(/Amount:\s*₹?([\d.]+)/);
+            if (amountMatch) {
+              const amount = parseFloat(amountMatch[1]);
+              storePaymentAmount(amount);
+            }
+          }
+        }
+      };
+
+      socket.onclose = () => {
+        console.log("WebSocket connection closed");
+        addMessage("System", "Disconnected from Museo AI.", "ai-message");
+      };
+
+      sendButton.onclick = sendMessage;
+      messageInput.onkeypress = (e) => {
+        if (e.key === "Enter") {
+          sendMessage();
+        }
+      };
+
+      function sendMessage() {
+        const message = messageInput.value.trim();
+        if (message) {
+          addMessage("You", message, "user-message");
+          socket.send(
+            JSON.stringify({
+              message: message,
+              session_id: sessionId,
+            })
+          );
+          messageInput.value = "";
+
+          currentAiMessage = "";
+          aiMessageElement = null;
+        }
+      }
+
+      function addMessage(sender, message, className) {
+        const messageElement = document.createElement("div");
+        messageElement.classList.add("message", className);
+
+        const avatar = document.createElement("div");
+        avatar.classList.add("avatar");
+
+        if (sender === "You") {
+          avatar.innerHTML = `
+              <svg viewBox="0 0 24 24" fill="#00123a">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+              </svg>`;
+        }
+
+        const content = document.createElement("div");
+        content.classList.add("message-content");
+        content.textContent = message;
+
+        messageElement.appendChild(avatar);
+        messageElement.appendChild(content);
+        chatMessages.appendChild(messageElement);
+
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      // Function to handle AI response
+      function handleAIResponse(response) {
+        // Check if the response contains the redirection command
+        if (response.includes("<REDIRECT_TO_PAYMENT>")) {
+          // Extract the payment amount from the response
+          const amountMatch = response.match(/Amount:\s*₹?([\d.]+)/);
+          if (amountMatch) {
+            const amount = parseFloat(amountMatch[1]);
+            // Store the payment amount and redirect
+            calculateAndRedirectToPayment(amount);
+          }
+        }
+      }
+
+      async function calculateAndRedirectToPayment(amount) {
+        try {
+          // Store the payment amount in localStorage
+          localStorage.setItem("paymentAmount", amount);
+
+          // Store the payment amount on the server (optional)
+          const response = await fetch("/store-payment", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ amount: amount, currency: "INR" }),
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to store payment amount on the server");
+          }
+
+          // Redirect to payment.html
+          window.location.href = "/payment.html";
+        } catch (error) {
+          console.error("Error storing payment amount:", error);
+          // Handle the error (e.g., show an error message to the user)
+        }
+      }
+
+      // Call this function when you've calculated the ticket amount
+      // For example: calculateAndRedirectToPayment(2500);
+    </script>
+  </body>
+</html>
