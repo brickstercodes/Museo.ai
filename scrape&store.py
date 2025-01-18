@@ -49,13 +49,10 @@ def scrape_indian_museums() -> List[Dict[str, str]]:
     return museums
 
 # Configure OpenAI and Supabase
-openai.api_key = "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"
-supabase_url = "https://ckwxnombsirouyhkmxiu.supabase.co"
-supabase_key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkNzQwZjQwZi1mZjQwLTQwZjUtYjIwZi1mZjQwZjUwZjQwZjUiLCJpYXQiOjE2MzQwNjYwNzIsInVzZXJfaWQiOiJkNzQwZjQwZi1mZjQwLTQwZjUtYjIwZi1mZjQwZjUwZjQwZjUiLCJlbWFpbCI6ImFkbWluQGdtYWlsLmNvbSIsInJvbGUiOiJ1c2VyIn0.7"
+openai.api_key = ""
+supabase_url = ""
+supabase_key = ""
 supabase: Client = create_client(supabase_url, supabase_key)
-
-# OPENAI_API_KEY = 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
-# SUPABASE_KEY = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkNzQwZjQwZi1mZjQwLTQwZjUtYjIwZi1mZjQwZjUwZjQwZjUiLCJpYXQiOjE2MzQwNjYwNzIsInVzZXJfaWQiOiJkNzQwZjQwZi1mZjQwLTQwZjUtYjIwZi1mZjQwZjUwZjQwZjUiLCJlbWFpbCI6ImFkbWluQGdtYWlsLmNvbSIsInJvbGUiOiJ1c2VyIn0.7
 
 client = OpenAI(api_key=openai.api_key)
 
