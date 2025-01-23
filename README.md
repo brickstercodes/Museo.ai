@@ -87,3 +87,21 @@ Museo.ai/
 │   └── utils/
 ├── requirements.txt
 └── README.md
+
+- **frontend/**: Contains HTML files, stylesheets, and JavaScript files.
+- **backend/**: Contains Python backend files, including application logic, models, routes, and utility functions.
+- **requirements.txt**: Lists the Python dependencies required for the project.
+```
+## Contributing
+
+We welcome contributions to Museo.ai! If you're interested in contributing, please follow these steps:
+
+1. Fork the repository.
+2. Create a new branch for your feature or bug fix.
+3. Implement your changes.
+4. Commit and push your changes to your branch.
+5. Open a pull request and describe your changes.
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
